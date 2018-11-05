@@ -1,0 +1,25 @@
+# File: test.yaml
+# Author: Luke Burks
+# Date: September 2018
+# 
+# Simple Wikipedia HMM problem
+#
+
+
+States : ['Sunny','Cloudy','Rainy'] 
+
+Observations : ['Sunny','Cloudy','Rainy']
+
+Initial_Probability : {'Sunny': 1,'Cloudy': 0,'Rainy': 0}
+
+#Transition_Probability ={'Sunny': {'Sunny': .8,'Cloudy':.2,'Rainy':0}, 'Cloudy':{'Sunny':.4,'Cloudy':.4,'Rainy':.2}, 'Rainy':{'Sunny':.2,'Cloudy':.6,'Rainy':.2}} 
+Transition_Probability :
+  Sunny: {'Sunny': .6,'Cloudy': .2,'Rainy': .2}
+  Cloudy: {'Sunny': .4,'Cloudy': .4,'Rainy': .2}
+  Rainy: {'Sunny': .2,'Cloudy': .6,'Rainy': .2} 
+
+#Observation_Probability = {'Sunny':{'Sunny':.6,'Cloudy':.4,'Rainy':0}, 'Cloudy':{'Sunny':.3,'Cloudy':.7,'Rainy':0}, 'Rainy':{'Sunny':0,'Cloudy':0,'Rainy':1}} 
+Observation_Probability : 
+  Sunny: {'Sunny': .6,'Cloudy': .4,'Rainy': 0}
+  Cloudy: {'Sunny': .3,'Cloudy': .5,'Rainy': .2}
+  Rainy: {'Sunny': .1,'Cloudy': .1,'Rainy': .8} 

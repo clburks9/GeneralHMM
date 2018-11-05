@@ -1,0 +1,23 @@
+# File: simple.yaml
+# Author: Luke Burks
+# Date: September 2018
+# 
+# Simple HMM problem
+#
+
+
+States : ['S1','S2'] 
+
+Observations : ['NoEggs','Eggs']
+
+Initial_Probability : {'S1': .6,'S2': .4}
+
+
+Transition_Probability :
+  S1: {'S1': 0,'S2': 1}
+  S2: {'S1': 1,'S2': 0}
+
+
+Observation_Probability : 
+  S1: {'NoEggs': 0,'Eggs': 1}
+  S2: {'NoEggs': 1,'Eggs': 0}

@@ -1,0 +1,21 @@
+# File: baumTest.py
+# Author: Luke Burks
+# Date: September 2018
+# 
+# Simple HMM test problem for the baum-welch problem
+#
+
+
+States = ['Spring','Summer','Fall','Winter'] 
+
+Observations = ['Sun','Snow','Rain','Tornado']
+
+Initial_Probability = {'Spring':1/4,'Summer':1/4,'Fall':1/4,'Winter':1/4}
+
+#Transition_Probability ={'Sunny': {'Sunny': .8,'Cloudy':.2,'Rainy':0}, 'Cloudy':{'Sunny':.4,'Cloudy':.4,'Rainy':.2}, 'Rainy':{'Sunny':.2,'Cloudy':.6,'Rainy':.2}} 
+#Transition_Probability ={'Sunny': {'Sunny': .6,'Cloudy':.2,'Rainy':.2}, 'Cloudy':{'Sunny':.4,'Cloudy':.4,'Rainy':.2}, 'Rainy':{'Sunny':.2,'Cloudy':.6,'Rainy':.2}} 
+Transition_Probability = {'Spring':{'Spring':.7,'Summer':.2,'Fall':.05,'Winter':.05},'Summer':{'Spring':.05,'Summer':.7,'Fall':.05,'Winter':.2},'Fall':{'Spring':.05,'Summer':.05,'Fall':.8,'Winter':.1},'Winter':{'Spring':.05,'Summer':.025,'Fall':.025,'Winter':.9}}
+
+#Observation_Probability = {'Sunny':{'Sunny':.6,'Cloudy':.4,'Rainy':0}, 'Cloudy':{'Sunny':.3,'Cloudy':.7,'Rainy':0}, 'Rainy':{'Sunny':0,'Cloudy':0,'Rainy':1}} 
+#Observation_Probability = {'Sunny':{'Sunny':.6,'Cloudy':.4,'Rainy':0}, 'Cloudy':{'Sunny':.3,'Cloudy':.5,'Rainy':.2}, 'Rainy':{'Sunny':.1,'Cloudy':.1,'Rainy':.8}} 
+Observation_Probability = {'Spring':{'Sun':.4,'Snow':.1,'Rain':.4,'Tornado':.1},'Summer':{'Sun':.6,'Snow':0,'Rain':.2,'Tornado':.2},'Fall':{'Sun':.3,'Snow':.2,'Rain':.1,'Tornado':.4},'Winter':{'Sun':.1,'Snow':.8,'Rain':.05,'Tornado':.05}}
