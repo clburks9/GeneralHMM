@@ -93,7 +93,6 @@ class CHMM(HMM):
 			for s in self.states:
 				beta[i][s] = sum(self.Tprob[s][sprime]*self.Oprob[self.states.index(sprime)].pointEval(obs[i])*beta[i+1][sprime] for sprime in self.states);
 
-		#beta.remove(beta[-1]); 
 
 		return beta; 
 

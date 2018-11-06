@@ -31,7 +31,7 @@ class DHMM(HMM):
 
 	def __init__(self,inputFile=None): 
 
-		super(inputFile);
+		super().__init__(inputFile);
 
 
 
@@ -46,7 +46,7 @@ class DHMM(HMM):
 			for s in self.states:
 				alpha[i][s] = self.Oprob[s][obs[i]]*sum(self.Tprob[sprime][s]*alpha[i-1][sprime] for sprime in self.states); 
 
-		alpha.remove(alpha[0]); 
+		alpha.insert(0,self.Iprob);
 
 		return alpha; 
 
@@ -61,9 +61,7 @@ class DHMM(HMM):
 
 		for i in range(len(obs)-2,-1,-1):
 			for s in self.states:
-				beta[i][s] = sum(self.Tprob[s][sprime]*self.Oprob[sprime][obs[i]]*beta[i+1][sprime] for sprime in self.states);
-
-		beta.remove(beta[-1]); 
+				beta[i][s] = sum(self.Tprob[s][sprime]*self.Oprob[sprime][obs[i]]*beta[i+1][sprime] for sprime in self.states); 
 
 		return beta; 
 
@@ -110,7 +108,7 @@ class DHMM(HMM):
 		return states,obs
 
 
-	def viterbi(self,obs):
+	def viterbi(self,obs,initState=None):
 		#From Wikipedia page on viterbi
 		V=[{}]; 
 		for st in self.states:
@@ -188,7 +186,7 @@ def testForwardBackward(h):
 
 def testViterbi(h):
 	obs = ['Cloudy','Cloudy','Rainy','Sunny']; 
-	seq = h.viterbi(obs)
+	seq = h.viterbi(obs,'Cloudy'); 
 
 	print(seq); 
 
@@ -208,9 +206,9 @@ def testSimulate(h):
 
 
 def simAndViterbiTest(h):
-	states,obs = h.simulate(1000,'Sunny');
+	states,obs = h.simulate(1000,'Spring');
 
-	seq = h.viterbi(obs); 
+	seq = h.viterbi(obs,'Spring'); 
 	
 	perCor = 0; 
 	for i in range(0,len(states)):
@@ -228,8 +226,6 @@ def simAndForwardBackward(h):
 
 	probs = h.forwardBackward(obs); 
 
-	probs.insert(0,h.Iprob); 
-
 	perCorFB = 0; 
 	for i in range(1,len(states)):
 		m = max(probs[i],key=probs[i].get); 
@@ -238,7 +234,7 @@ def simAndForwardBackward(h):
 	perCorFB /=len(states); 
 	print("F/B Accuracy: {0:.2f}%".format(perCorFB*100))		
 
-	seq = h.viterbi(obs); 
+	seq = h.viterbi(obs,'Sunny'); 
 	
 	#seq.remove(seq[0])
 
@@ -279,12 +275,12 @@ def simAndForwardBackward(h):
 
 
 if __name__ == '__main__':
-	h = HMM('../yaml/baumTest.yaml');  
+	h = DHMM('../yaml/baumTest.yaml');  
 
-	h.display()
+	#h.display()
 
 	#simAndViterbiTest(h); 
-	#testViterbi(h); 
+	testViterbi(h); 
 	#testSimulate(h); 
 	#testForwardBackward(h); 
 	#simAndForwardBackward(h); 
