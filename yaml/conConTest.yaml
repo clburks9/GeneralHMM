@@ -1,0 +1,22 @@
+# File: conConTest.yaml
+# Author: Luke Burks
+# Date: November 2018
+# 
+# Simple Continuous State Test HMM
+# Continuous observations, with each state coresponding to a Gaussian
+
+
+States: ['Winter','Fall','Spring','Summer'] 
+
+Observations: ['Temperature']
+
+Initial_Probability: {'Spring': .25,'Summer': .25,'Fall': .25,'Winter': .25}
+
+Transition_Probability : 
+  Spring: {'Spring': .7,'Summer': .2,'Fall': .05,'Winter': .05}
+  Summer: {'Spring': .05,'Summer': .7,'Fall': .05,'Winter': .2}
+  Fall: {'Spring': .05,'Summer': .05,'Fall': .8,'Winter': .1}
+  Winter: {'Spring': .05,'Summer': .025,'Fall': .025,'Winter': .9}
+
+
+Observation_Probability: {'Means': [40,60,70,85],'Vars':[10,10,10,10],'Weights':[1,1,1,1]}

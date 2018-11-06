@@ -2,9 +2,8 @@
 # Author: Luke Burks
 # Date: September 2018
 # 
-# Simple HMM test problem for the baum-welch problem
+# Simple Discrete HMM test problem for the baum-welch problem
 #
-
 
 States: ['Spring','Summer','Fall','Winter'] 
 
