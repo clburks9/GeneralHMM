@@ -5,6 +5,7 @@
 # Simple Discrete HMM test problem for the baum-welch problem
 #
 
+
 States: ['Spring','Summer','Fall','Winter'] 
 
 Observations: ['Sun','Snow','Rain','Tornado']

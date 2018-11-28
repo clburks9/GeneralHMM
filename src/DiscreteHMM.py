@@ -36,15 +36,24 @@ class DHMM(HMM):
 
 
 
-	def forward(self,obs):
+	def forward(self,obs,normed=False):
 		alpha = []; 
 		alpha.append({k:v*self.Oprob[k][obs[0]] for k,v in self.Iprob.items()}); 
+		#print(alpha[0])
 
 		for i in range(1,len(obs)):
 			alpha.append({key:1 for key in self.states}); 
 
 			for s in self.states:
 				alpha[i][s] = self.Oprob[s][obs[i]]*sum(self.Tprob[sprime][s]*alpha[i-1][sprime] for sprime in self.states); 
+			
+			if(normed):
+				suma = sum([alpha[i][st] for st in self.states]); 
+				#print(suma,alpha[i])
+				for st in self.states:
+					alpha[i][st] /= suma; 
+				#print(alpha[i],sum([alpha[i][s] for s in self.states])); 
+
 
 		alpha.insert(0,self.Iprob);
 
@@ -52,16 +61,23 @@ class DHMM(HMM):
 
 
 
-	def backward(self,obs):
+	def backward(self,obs,normed=False):
 
-
+		
 		beta = []; 
 		for i in range(0,len(obs)):
 			beta.append({key:1 for key in self.states}); 
 
+		
+
 		for i in range(len(obs)-2,-1,-1):
 			for s in self.states:
 				beta[i][s] = sum(self.Tprob[s][sprime]*self.Oprob[sprime][obs[i]]*beta[i+1][sprime] for sprime in self.states); 
+				if(normed):
+					suma = sum([beta[i][st] for st in self.states]); 
+					for st in self.states:
+						beta[i][st] /= suma; 
+
 
 		return beta; 
 
@@ -139,6 +155,100 @@ class DHMM(HMM):
 
 
 		return opt; 
+
+
+	def baumWelch(self,obs,maxIter = 100):
+		
+		print("*********************************************************************************************")
+		print("Warning!!!!! The Baum-Welch Method has not been completed, and will just output junk answers"); 
+		print("*********************************************************************************************")
+
+		for count in range(0,maxIter):
+
+			alpha = self.forward(obs,normed=True)[1:]; 
+			beta = self.backward(obs,normed=True); 
+			
+			# for t in range(0,len(alpha)):
+			# 	suma = sum(alpha[t].values()); 
+			# 	#print(alpha[t].values())
+			# 	for key in alpha[t].keys():
+			# 		alpha[t][key] /= suma; 
+
+			# for t in range(0,len(beta)):
+			# 	suma = sum(beta[t].values()); 
+			# 	for key in beta[t].keys():
+			# 		beta[t][key] /= suma; 
+
+			gamma = []; 
+			for i in range(0,len(alpha)):
+				gamma.append({key:0 for key in self.states}); 
+
+
+			for t in range(0,len(alpha)):
+				for s in self.states:
+					numer = alpha[t][s]*beta[t][s]; 
+					denom = 0; 
+					for sprime in self.states:
+						denom += alpha[t][sprime]*beta[t][sprime]; 
+					gamma[t][s] = numer/denom; 
+
+			chi = []; 
+			for i in range(0,len(alpha)):
+				chi.append({key:{key:0 for key in self.states} for key in self.states}); 
+
+			for t in range(0,len(alpha)-1):
+				for s in self.states:
+					for sprime in self.states:
+						numer = alpha[t][s]*self.Tprob[s][sprime]*self.Oprob[sprime][obs[t+1]]*beta[t+1][sprime];
+						denom = 0; 
+						for s2 in self.states:
+							for s3 in self.states:
+								denom += alpha[t][s2]*self.Tprob[s2][s3]*self.Oprob[s3][obs[t+1]]*beta[t+1][s3];
+						chi[t][s][sprime] = numer/denom; 
+
+			self.Iprob = gamma[0]; 
+			
+
+			for s in self.states:
+				for sprime in self.states:
+					self.Tprob[s][sprime] = sum([chi[t][s][sprime] for t in range(0,len(chi)-1)])/sum(gamma[t][s] for t in range(0,len(chi)-1)); 
+			
+
+			# for i in range(0,len(gamma)):
+			# 	print(gamma[i]); 
+
+			for s in self.states:
+				for o in self.obs:
+					numer = 0; 
+					denom = 0; 
+					for t in range(0,len(gamma)):
+						if(obs[t] == o):
+							numer += gamma[t][s]; 
+						denom += gamma[t][s]; 
+					self.Oprob[s][o] = numer/denom; 
+
+		print("Initial:")
+		print(self.Iprob); 
+		
+		print()
+		print("Transition:"); 
+		for s in self.states:
+			st = ""; 
+			for sprime in self.states:
+				st = st + sprime + ": " + "{0:.2f}, ".format(self.Tprob[s][sprime])
+			print(s + ": " + st); 
+
+		print();
+
+		print("Observation:"); 
+		for s in self.states:
+			st = ""; 
+			for o in self.obs:
+				st = st + o + ": " + "{0:.2f}, ".format(self.Oprob[s][o])
+			print(s + ": " + st); 
+
+
+
 
 
 def testForwardBackward(h):
@@ -271,19 +381,91 @@ def simAndForwardBackward(h):
 	plt.show();
 
 
+def testBaumWelch(h):
+	hBW = DHMM(); 
+	numStates = 4; 
+	numObs = 4; 
+	obs = ['Sun','Snow','Rain','Tornado'];
+	states = []; 
+	for i in range(0,numStates):
+		states.append(str(i)); 
+	hBW.states = states; 
+	hBW.obs = obs; 
+	#Initialize Uniform Transitions, Initials, and Observations
+	tmat = {}; 
+	for i in range(0,numStates):
+		tmat[str(i)] = {}; 
+		suma = 0; 
+		for j in range(0,numStates):
+			tmat[str(i)][str(j)] = np.random.random(); 
+			suma += tmat[str(i)][str(j)]; 
+		for j in range(0,numStates):
+			tmat[str(i)][str(j)] /= suma; 
+	hBW.Tprob = tmat; 
+
+	imat = {}; 
+	suma = 0; 
+	for i in range(0,numStates):
+		imat[str(i)] = np.random.random(); 
+		suma += imat[str(i)];
+	for i in range(0,numStates):
+		imat[str(i)] /= suma; 
+	hBW.Iprob = imat; 
+
+	omat = {}; 
+	for i in range(0,numStates):
+		omat[str(i)] = {}; 
+		suma = 0; 
+		for o in obs:
+			omat[str(i)][o] = np.random.random(); 
+			suma += omat[str(i)][o]; 
+		for o in obs:
+			omat[str(i)][o] /= suma; 
+	hBW.Oprob = omat; 
+
+	#Get training data
+	timeSteps = 1000; 
+	init = np.random.choice(list(h.Iprob.keys()),p=list(h.Iprob.values()))
+	states,obs = h.simulate(timeSteps-1,init); 
+
 	
+	#do Baum-Welch
+	hBW.baumWelch(obs,maxIter = 1000); 
+
+	#t1 = h.forward(obs); 
+	# t2 = h.forward(obs,True); 
+
+	# for i in range(0,len(t1)):
+
+	# 	st = ""; 
+	# 	for sprime in h.states:
+	# 		st = st + sprime + ": " + "{0:.2f}, ".format(t1[i][sprime])
+
+	# 	print(st); 
+
+	# 	st = ""; 
+	# 	for sprime in h.states:
+	# 		st = st + sprime + ": " + "{0:.2f}, ".format(t2[i][sprime])
+		
+	# 	print(st); 
+	# 	print(); 
+
+
 
 
 if __name__ == '__main__':
 	h = DHMM('../yaml/baumTest.yaml');  
+	
 
 	#h.display()
 
 	#simAndViterbiTest(h); 
-	testViterbi(h); 
+	#testViterbi(h); 
 	#testSimulate(h); 
 	#testForwardBackward(h); 
 	#simAndForwardBackward(h); 
+
+	testBaumWelch(h); 
 
 
 
